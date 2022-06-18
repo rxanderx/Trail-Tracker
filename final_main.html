@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>GIS Mapping - Trail Tracker</title>
+    <link href="https://fonts.googleapis.com/css?family=Kalam&display=swap" rel="stylesheet">
+    
+    
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="https://js.arcgis.com/4.23/esri/themes/light/main.css">
+    
+    <script src="https://js.arcgis.com/4.23/"></script>
+    <script>
+
+        require([
+            "esri/config",
+            "esri/Map",
+            "esri/views/MapView",
+      
+            "esri/layers/FeatureLayer"
+          ],
+      
+          function(esriConfig,Map, MapView, FeatureLayer){
+      
+           esriConfig.apiKey = "AAPKf73beadf7d6b41c4a47b0ff3f84f50devG7Lf2EQRl9pPd8gMTCfLRhyVuSd5CCuyGkKVLxaFNivoJm-8LKgVt1hlrTk1TYn";
+      
+            const map = new Map({
+              basemap: "arcgis-topographic" //Basemap layer service
+            });
+      
+            const view = new MapView({
+              container: "viewDiv",
+              map: map,
+            center: [-118.80543,34.02700], //Longitude, latitude for Cali trails
+              // Bainbridge center: [-122.5210,47.6249],
+              zoom: 13
+            });
+      
+            // Define a pop-up for Trailheads
+            const popupTrailheads = {
+              "title": "Trailhead",
+              "content": "<b>Trail:</b> {TRL_NAME}<br><b>City:</b>  {X_STREET}<br><b>Parking:</b> {PARKING}<br><b>Elevation:</b> {ELEV_FT} ft"
+            }
+      
+          const trailheads = new FeatureLayer({
+              url: "https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/Trailheads_Styled/FeatureServer/0",
+              outFields: ["TRL_NAME","X_STREET","PARKING","ELEV_FT"],
+              popupTemplate: popupTrailheads
+            });
+      
+            map.add(trailheads);
+      
+            // Define a popup for the trail in the area
+            const popupTrails = {
+              title: "Trail Information",
+              content: [{
+               type: "media",
+                mediaInfos: [{
+                  type: "column-chart",
+                  caption: "",
+                  value: {
+                    fields: [ "ELEV_MIN","ELEV_MAX" ],
+                    normalizeField: null,
+                    tooltipField: "Min and max elevation values"
+                    }
+                  }]
+              }]
+            }
+      
+            const trails = new FeatureLayer({
+              url: "https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/Trails_Styled/FeatureServer/0",
+              outFields: ["TRL_NAME","ELEV_GAIN"],
+              popupTemplate: popupTrails
+            });
+      
+            map.add(trails,0);
+      
+            // Define popup for Parks and Open Spaces
+            const popupOpenspaces = {
+              "title": "{PARK_NAME}",
+              "content": [{
+                "type": "fields",
+                "fieldInfos": [
+                  {
+                    "fieldName": "AGNCY_NAME",
+                    "label": "Agency",
+                    "isEditable": true,
+                    "tooltip": "",
+                    "visible": true,
+                    "format": null,
+                    "stringFieldOption": "text-box"
+                  },
+                  {
+                    "fieldName": "TYPE",
+                    "label": "Type",
+                    "isEditable": true,
+                    "tooltip": "",
+                    "visible": true,
+                    "format": null,
+                    "stringFieldOption": "text-box"
+                  },
+                  {
+                    "fieldName": "ACCESS_TYP",
+                    "label": "Access",
+                    "isEditable": true,
+                    "tooltip": "",
+                    "visible": true,
+                    "format": null,
+                    "stringFieldOption": "text-box"
+                  },
+      
+                  {
+                    "fieldName": "GIS_ACRES",
+                    "label": "Acres",
+                    "isEditable": true,
+                    "tooltip": "",
+                    "visible": true,
+                    "format": {
+                      "places": 2,
+                      "digitSeparator": true
+                    },
+      
+                    "stringFieldOption": "text-box"
+                  }
+                ]
+              }]
+            }
+      
+            const openspaces = new FeatureLayer({
+              url: "https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/Parks_and_Open_Space_Styled/FeatureServer/0",
+              outFields: ["TYPE","PARK_NAME", "AGNCY_NAME","ACCESS_TYP","GIS_ACRES","TRLS_MI","TOTAL_GOOD","TOTAL_FAIR", "TOTAL_POOR"],
+              popupTemplate: popupOpenspaces
+            });
+      
+            map.add(openspaces,0);
+      
+          });
+        </script>
+</head>
+
+<body>
+    <nav>
+        <ul id="menu">
+            <li><a id="toggleMenu">&equiv;</a></li>
+            <li><a href="final_about.html">About This Project</a></li>
+            <li><a href="final_main.html" class="active">Trail Tracker</a></li>
+            
+        </ul>
+    </nav>
+    <header>
+        <h1>Trail Tracker</h1>
+    </header>
+    
+            <div id="viewDiv" style="min-height: 1000px;"></div>
+    
+    <footer>
+        &copy;<span id="year"></span> | Xander Weibel 
+    </footer>
+    <script src="scripts/main.js"></script>
+    <script src="scripts/final.js"></script>
+</body>
+
+</html>
